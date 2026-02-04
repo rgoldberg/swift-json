@@ -5,7 +5,7 @@ extension Array: ConvertibleToJSValue where Element: ConvertibleToJSValue {
 }
 extension Array: ConstructibleFromJSValue where Element: ConstructibleFromJSValue {
     @inlinable public static func construct(from value: JSValue) -> [Element]? {
-        guard case .object(let object) = value, object.isArray else {
+        guard case .object(let object) = value.storage, object.isArray else {
             return nil
         }
 
