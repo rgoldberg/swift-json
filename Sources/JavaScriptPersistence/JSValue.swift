@@ -1,18 +1,40 @@
 import JSON
 
-@frozen public enum JSValue {
-    case boolean(Bool)
-    case string(JSString)
-    case number(Double)
-    case object(JSObject)
-    case null
-    case undefined
-    case symbol(JSSymbol)
-    case bigInt(JSBigInt)
+@frozen public struct JSValue {
+    @usableFromInline let storage: Storage
+    @inlinable init(storage: Storage) {
+        self.storage = storage
+    }
+}
+extension JSValue {
+    @inlinable public static func boolean(_ value: Bool) -> Self {
+        .init(storage: .boolean(value))
+    }
+    @inlinable public static func string(_ value: JSString) -> Self {
+        .init(storage: .string(value))
+    }
+    @inlinable public static func number(_ value: Double) -> Self {
+        .init(storage: .number(value))
+    }
+    @inlinable public static func object(_ value: JSObject) -> Self {
+        .init(storage: .object(value))
+    }
+    @inlinable public static var null: Self {
+        .init(storage: .null)
+    }
+    @inlinable public static var undefined: Self {
+        .init(storage: .undefined)
+    }
+    @inlinable public static func symbol(_ value: JSSymbol) -> Self {
+        .init(storage: .symbol(value))
+    }
+    @inlinable public static func bigInt(_ value: JSBigInt) -> Self {
+        .init(storage: .bigInt(value))
+    }
 }
 extension JSValue: JSONEncodable {
     public func encode(to json: inout JSON) {
-        switch self {
+        switch self.storage {
         case .null:
             (nil as Never?).encode(to: &json)
         case .boolean(let js):
@@ -108,21 +130,23 @@ extension JSValue: ConvertibleToJSValue {
     @inlinable public var jsValue: JSValue { self }
 }
 extension JSValue {
-    @available(
-        *, unavailable,
-        message: "code that expects a numeric value should check for 'BigInt' as well"
-    ) @inlinable public var number: Double? {
-        guard case .number(let value) = self else {
+    @inlinable public var number: Double? {
+        guard case .number(let value) = self.storage else {
             return nil
         }
         return value
     }
 
-    @available(
-        *, unavailable,
-        message: "code that expects a numeric value should check for 'Double' as well"
-    ) @inlinable public var bigInt: JSBigInt? {
-        guard case .bigInt(let value) = self else {
+    @inlinable public var bigInt: JSBigInt? {
+        guard case .bigInt(let value) = self.storage else {
+            return nil
+        }
+        return value
+    }
+}
+extension JSValue {
+    @inlinable public var jsString: JSString? {
+        guard case .string(let value) = self.storage else {
             return nil
         }
         return value
@@ -130,42 +154,42 @@ extension JSValue {
 }
 extension JSValue {
     @inlinable public var boolean: Bool? {
-        guard case .boolean(let value) = self else {
+        guard case .boolean(let value) = self.storage else {
             return nil
         }
         return value
     }
 
     @inlinable public var string: String? {
-        guard case .string(let value) = self else {
+        guard case .string(let value) = self.storage else {
             return nil
         }
         return value.string
     }
 
     @inlinable public var object: JSObject? {
-        guard case .object(let value) = self else {
+        guard case .object(let value) = self.storage else {
             return nil
         }
         return value
     }
 
     @inlinable public var symbol: JSSymbol? {
-        guard case .symbol(let value) = self else {
+        guard case .symbol(let value) = self.storage else {
             return nil
         }
         return value
     }
 
     @inlinable public var isNull: Bool {
-        guard case .null = self else {
+        guard case .null = self.storage else {
             return false
         }
         return true
     }
 
     @inlinable public var isUndefined: Bool {
-        guard case .undefined = self else {
+        guard case .undefined = self.storage else {
             return false
         }
         return true

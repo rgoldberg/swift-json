@@ -18,7 +18,7 @@ extension JSString: ConvertibleToJSValue {
 }
 extension JSString: ConstructibleFromJSValue {
     @inlinable public static func construct(from value: JSValue) -> JSString? {
-        guard case .string(let string) = value else {
+        guard case .string(let string) = value.storage else {
             return nil
         }
         return string
