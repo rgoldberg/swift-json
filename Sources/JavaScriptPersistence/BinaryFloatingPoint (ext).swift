@@ -1,6 +1,6 @@
 extension BinaryFloatingPoint where Self: ConstructibleFromJSValue {
     @inlinable public static func construct(from value: JSValue) -> Self? {
-        switch value {
+        switch value.storage {
         case .number(let value):
             return Self.init(value)
         case .bigInt(let value):

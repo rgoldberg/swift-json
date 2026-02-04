@@ -1,6 +1,6 @@
 extension Optional: ConstructibleFromJSValue where Wrapped: ConstructibleFromJSValue {
     @inlinable public static func construct(from value: JSValue) -> Self? {
-        switch value {
+        switch value.storage {
         case .null, .undefined:
             return .some(nil)
         default:
