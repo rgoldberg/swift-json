@@ -4,13 +4,11 @@ import PackageDescription
 
 let package: Package = .init(
     name: "swift-json",
-    platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .watchOS(.v11), .visionOS(.v2)],
+    platforms: [.macOS(.v10_15), .iOS(.v13), .tvOS(.v13), .watchOS(.v6), .visionOS(.v1)],
     products: [
         .library(name: "JSON", targets: ["JSON"]),
         .library(name: "JSONAST", targets: ["JSONAST"]),
         .library(name: "JSONLegacy", targets: ["JSONLegacy"]),
-        .library(name: "JavaScriptPersistence", targets: ["JavaScriptPersistence"]),
-
         .library(name: "_JSON_SnippetsAnchor", targets: ["_JSON_SnippetsAnchor"]),
     ],
     dependencies: [
@@ -56,13 +54,6 @@ let package: Package = .init(
                 .target(name: "JSONDecoding"),
                 .target(name: "JSONEncoding"),
                 .target(name: "JSONParsing"),
-            ]
-        ),
-
-        .target(
-            name: "JavaScriptPersistence",
-            dependencies: [
-                .target(name: "JSON"),
             ]
         ),
 
