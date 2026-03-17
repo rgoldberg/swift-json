@@ -4,6 +4,10 @@ set -euo pipefail
 export WARNINGS_AS_ERRORS=1
 
 swift --version
+
+swift package dollup --allow-writing-to-package-directory
+git diff --exit-code
+
 swift test
 swift build -c release \
     --explicit-target-dependency-import-check=error
