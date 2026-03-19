@@ -12,8 +12,8 @@ let package: Package = .init(
         .library(name: "_JSON_SnippetsAnchor", targets: ["_JSON_SnippetsAnchor"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/tayloraswift/swift-grammar", from: "0.5.0"),
-        .package(url: "https://github.com/tayloraswift/dollup", from: "0.7.0"),
+        .package(url: "https://github.com/ordo-one/dollup", from: "1.0.1"),
+        .package(url: "https://github.com/rarestype/gram", from: "1.0.0"),
     ],
     targets: [
         .target(name: "JSONAST"),
@@ -22,7 +22,7 @@ let package: Package = .init(
             name: "JSONDecoding",
             dependencies: [
                 .target(name: "JSONAST"),
-                .product(name: "Grammar", package: "swift-grammar"),
+                .product(name: "Grammar", package: "gram"),
             ]
         ),
 
@@ -44,7 +44,7 @@ let package: Package = .init(
             name: "JSONParsing",
             dependencies: [
                 .target(name: "JSONAST"),
-                .product(name: "Grammar", package: "swift-grammar"),
+                .product(name: "Grammar", package: "gram"),
             ]
         ),
 
