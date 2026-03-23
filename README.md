@@ -13,16 +13,7 @@ pure swift json parsing and encoding for high-performance, high-throughput serve
 
 The swift-json library requires Swift 6.2 or later.
 
-
-| Platform | Status |
-| -------- | ------ |
-| 💬 Documentation | [![Documentation](https://github.com/rarestype/swift-json/actions/workflows/Documentation.yml/badge.svg)](https://github.com/rarestype/swift-json/actions/workflows/Documentation.yml) |
-| 🐧 Linux | [![Tests](https://github.com/rarestype/swift-json/actions/workflows/Tests.yml/badge.svg)](https://github.com/rarestype/swift-json/actions/workflows/Tests.yml) |
-| 🍏 Darwin | [![Tests](https://github.com/rarestype/swift-json/actions/workflows/Tests.yml/badge.svg)](https://github.com/rarestype/swift-json/actions/workflows/Tests.yml) |
-| 🍏 Darwin (iOS) | [![iOS](https://github.com/rarestype/swift-json/actions/workflows/iOS.yml/badge.svg)](https://github.com/rarestype/swift-json/actions/workflows/iOS.yml) |
-| 🍏 Darwin (tvOS) | [![tvOS](https://github.com/rarestype/swift-json/actions/workflows/tvOS.yml/badge.svg)](https://github.com/rarestype/swift-json/actions/workflows/tvOS.yml) |
-| 🍏 Darwin (visionOS) | [![visionOS](https://github.com/rarestype/swift-json/actions/workflows/visionOS.yml/badge.svg)](https://github.com/rarestype/swift-json/actions/workflows/visionOS.yml) |
-| 🍏 Darwin (watchOS) | [![watchOS](https://github.com/rarestype/swift-json/actions/workflows/watchOS.yml/badge.svg)](https://github.com/rarestype/swift-json/actions/workflows/watchOS.yml) |
-
+<!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
+<!-- DO NOT EDIT ABOVE! AUTOSYNC CONTENT [STATUS TABLE] -->
 
 [Check deployment minimums](https://swiftinit.org/docs/swift-json#ss:platform-requirements)
