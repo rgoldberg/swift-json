@@ -17,6 +17,14 @@ extension JSON.Node {
             yield &self[index, in: nil]
         }
     }
+    @inlinable public subscript() -> JSON.ArrayAccessor {
+        get {
+            self[..., in: nil]
+        }
+        _modify {
+            yield &self[..., in: nil]
+        }
+    }
 }
 extension JSON.Node {
     @inlinable subscript(field: JSON.Key, in crumb: JSON.PathComponent?) -> JSON.NodeAccessor {
@@ -178,6 +186,57 @@ extension JSON.Node {
 
                     yield &accessor
                 }
+            default:
+                accessor = .protected(crumb)
+                yield &accessor
+            }
+        }
+    }
+    @inlinable subscript(
+        _: UnboundedRange,
+        in crumb: JSON.PathComponent?
+    ) -> JSON.ArrayAccessor {
+        get {
+            switch self {
+            case .array(let self):
+                return .occupied(self)
+            case .null:
+                return .writable
+            default:
+                return .protected(crumb)
+            }
+        }
+        _modify {
+            var accessor: JSON.ArrayAccessor
+
+            switch self {
+            case .array(var array):
+                _ = consume self ; defer {
+                    self = .array(array)
+                }
+
+                accessor = .occupied(array)
+                array.elements = []
+
+                defer {
+                    if  case .occupied(let values) = accessor.state {
+                        array.elements = values.elements
+                    }
+                }
+
+                yield &accessor
+
+            case .null:
+                accessor = .writable
+
+                defer {
+                    if  case .occupied(let values) = accessor.state {
+                        self = .array(values)
+                    }
+                }
+
+                yield &accessor
+
             default:
                 accessor = .protected(crumb)
                 yield &accessor

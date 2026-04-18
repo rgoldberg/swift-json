@@ -3,9 +3,9 @@ public import JSONAST
 extension JSON {
     @frozen public struct NodeAccessor: ~Copyable {
         @usableFromInline let crumb: PathComponent?
-        @usableFromInline var state: NodeAccess
+        @usableFromInline var state: NodeAccess<Node>
 
-        @inlinable init(crumb: PathComponent?, state: NodeAccess) {
+        @inlinable init(crumb: PathComponent?, state: NodeAccess<Node>) {
             self.crumb = crumb
             self.state = state
         }
@@ -62,10 +62,7 @@ extension JSON.NodeAccessor {
                 defer {
                     // we are allowed to overwrite undefined with a single-field object
                     if  case .occupied(let node) = self.state {
-                        self = .occupied(
-                            field: field,
-                            value: .object(JSON.Object.init([(field, node)]))
-                        )
+                        self.state = .occupied(.object(JSON.Object.init([(field, node)])))
                     }
                 }
                 yield &self
@@ -106,9 +103,8 @@ extension JSON.NodeAccessor {
                     defer {
                         // we are allowed to overwrite undefined with a vivified array
                         if  case .occupied(let node) = self.state {
-                            self = .occupied(
-                                index: index,
-                                value: .array(JSON.Array.init(value: node, at: index))
+                            self.state = .occupied(
+                                .array(JSON.Array.init(value: node, at: index))
                             )
                         }
                     }
@@ -119,6 +115,46 @@ extension JSON.NodeAccessor {
                 self.state = .writable
                 defer { self.state = .occupied(node) }
                 yield &node[index, in: self.crumb]
+            }
+        }
+    }
+    @inlinable public subscript() -> JSON.ArrayAccessor {
+        _read {
+            switch self.state {
+            case .protected:
+                yield .protected(self.crumb)
+            case .reserved(let offender):
+                yield .reserved(self.crumb, offender)
+            case .writable:
+                yield .writable
+            case .occupied(let node):
+                yield node[..., in: self.crumb]
+            }
+        }
+        _modify {
+            switch self.state {
+            case .protected:
+                var accessor: JSON.ArrayAccessor = .protected(self.crumb)
+                yield &accessor
+
+            case .reserved(let offender):
+                var accessor: JSON.ArrayAccessor = .reserved(self.crumb, offender)
+                yield &accessor
+
+            case .writable:
+                var accessor: JSON.ArrayAccessor = .writable
+                defer {
+                    // we are allowed to overwrite undefined with a vivified array
+                    if  case .occupied(let array) = accessor.state {
+                        self.state = .occupied(.array(array))
+                    }
+                }
+                yield &accessor
+
+            case .occupied(var node):
+                self.state = .writable
+                defer { self.state = .occupied(node) }
+                yield &node[..., in: self.crumb]
             }
         }
     }
@@ -176,7 +212,7 @@ extension JSON.NodeAccessor {
         }
     }
 
-    @inlinable public static func &! (
+    @inlinable public static func & (
         self: inout Self,
         yield: (inout JSON.Node?) throws -> ()
     ) throws {
@@ -207,6 +243,33 @@ extension JSON.NodeAccessor {
                 self.state = value.map { .occupied($0) } ?? .writable
             }
             try yield(&value)
+        }
+    }
+
+    @inlinable public static func |? <E, T>(
+        self: borrowing Self,
+        yield: (JSON.Node) throws(E) -> T
+    ) throws(E) -> T? {
+        if  case .occupied(let value) = self.state {
+            return try yield(value)
+        } else {
+            return nil
+        }
+    }
+
+    @inlinable public static func | <T>(
+        self: borrowing Self,
+        yield: (JSON.Node) throws -> T
+    ) throws -> T {
+        switch self.state {
+        case .protected:
+            throw JSON.NodeAccessError.protected(self.crumb)
+        case .reserved(let offender):
+            throw JSON.NodeAccessError.reserved(self.crumb, offender)
+        case .writable:
+            return try yield(.null)
+        case .occupied(let value):
+            return try yield(value)
         }
     }
 }

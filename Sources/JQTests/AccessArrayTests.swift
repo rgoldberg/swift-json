@@ -130,23 +130,35 @@ import Testing
 
     @Test static func Modify() throws {
         var node: JSON.Node = [[false, true]]
-        try node[0] &! {
+        try node[0] & {
             $0 = [true, false]
         }
 
         #expect("\(node)" == "\([[true, false]] as JSON.Node)")
-    }
-    @Test static func ModifyNested() throws {
-        var node: JSON.Node = [[[false, true], [true, false]]]
-        try node[0][1] &! {
+
+        try node[] & {
+            $0 = [true, true]
+        }
+
+        #expect("\(node)" == "\([true, true] as JSON.Node)")
+
+
+        var nested: JSON.Node = [[[false, true], [true, false]]]
+        try nested[0][1] & {
             $0 = .number(.init(1))
         }
 
-        #expect("\(node)" == "\([[[false, true], .number(.init(1))]] as JSON.Node)")
+        #expect("\(nested)" == "\([[[false, true], .number(.init(1))]] as JSON.Node)")
+
+        try nested[0][] & {
+            $0 = [true]
+        }
+
+        #expect("\(nested)" == "\([[true]] as JSON.Node)")
     }
     @Test static func ModifyDelete() throws {
         var node: JSON.Node = ["a": ["x": false, "y": true]]
-        try node["a"]["y"] &! {
+        try node["a"]["y"] & {
             $0 = nil
         }
 
@@ -154,7 +166,7 @@ import Testing
     }
     @Test static func ModifyNilToNil() throws {
         var node: JSON.Node = []
-        try node[3][2][4] &! {
+        try node[3][2][4] & {
             $0 = nil
         }
 
@@ -162,7 +174,7 @@ import Testing
     }
     @Test static func ModifyVivify() throws {
         var node: JSON.Node = []
-        try node[2][1][1] &! {
+        try node[2][1][1] & {
             $0 = true
         }
 
@@ -170,7 +182,7 @@ import Testing
     }
     @Test static func ModifyVivifyOverwriteNull() throws {
         var node: JSON.Node = [.null]
-        try node[0][0] &! {
+        try node[0][0] & {
             $0 = false
         }
 
@@ -179,7 +191,7 @@ import Testing
     @Test static func ModifyProtected() {
         #expect(throws: JSON.NodeAccessError.protected(.field("x"))) {
             var node: JSON.Node = ["x": [:]]
-            try node["x"][0] &! {
+            try node["x"][0] & {
                 $0 = true
             }
         }
@@ -229,5 +241,27 @@ import Testing
         var nested: JSON.Node = [[true, false]]
         #expect((nested[0][-1] &? { $0 = true }) != nil)
         #expect("\(nested)" == "\([[true, true]] as JSON.Node)")
+    }
+
+    @Test static func Pipe() throws {
+        let node: JSON.Node = [true, false]
+        #expect(try ["true", "false"] == node[] | { "\($0)" })
+
+        let nested: JSON.Node = [[true, false]]
+        #expect(try ["true", "false"] == nested[0][] | { "\($0)" })
+    }
+    @Test static func PipeSuccess() throws {
+        let node: JSON.Node = [true, false]
+        #expect(["true", "false"] == (node[] |? { "\($0)" }))
+
+        let nested: JSON.Node = [[true, false]]
+        #expect(["true", "false"] == (nested[0][] |? { "\($0)" }))
+    }
+    @Test static func PipeFailure() throws {
+        let node: JSON.Node = [:]
+        #expect(nil == (node[] |? { "\($0)" }))
+
+        let nested: JSON.Node = [[:]]
+        #expect(nil == (nested[0][] |? { "\($0)" }))
     }
 }

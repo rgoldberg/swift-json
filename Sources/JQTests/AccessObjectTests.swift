@@ -70,19 +70,19 @@ import Testing
 
     @Test static func Modify() throws {
         var node: JSON.Node = ["a": ["x": false, "y": true]]
-        try node["a"]["y"] &! {
+        try node["a"]["y"] & {
             $0 = .number(.init(1))
         }
 
         #expect("\(node)" == "\(["a": ["x": false, "y": .number(.init(1))]] as JSON.Node)")
 
-        try node["a"] &! {
+        try node["a"] & {
             $0 = .number(.init(1))
         }
 
         #expect("\(node)" == "\(["a": .number(.init(1))] as JSON.Node)")
 
-        try node["a"] &! {
+        try node["a"] & {
             $0 = [true, false]
         }
 
@@ -90,13 +90,13 @@ import Testing
     }
     @Test static func ModifyDelete() throws {
         var node: JSON.Node = ["a": ["x": false, "y": true]]
-        try node["a"]["y"] &! {
+        try node["a"]["y"] & {
             $0 = nil
         }
 
         #expect("\(node)" == "\(["a": ["x": false]] as JSON.Node)")
 
-        try node["a"] &! {
+        try node["a"] & {
             $0 = nil
         }
 
@@ -104,7 +104,7 @@ import Testing
     }
     @Test static func ModifyNilToNil() throws {
         var node: JSON.Node = [:]
-        try node["a"]["b"]["c"] &! {
+        try node["a"]["b"]["c"] & {
             $0 = nil
         }
 
@@ -112,7 +112,7 @@ import Testing
     }
     @Test static func ModifyVivify() throws {
         var node: JSON.Node = [:]
-        try node["a"]["b"]["c"] &! {
+        try node["a"]["b"]["c"] & {
             $0 = true
         }
 
@@ -120,14 +120,14 @@ import Testing
     }
     @Test static func ModifyVivifyOverwriteNull() throws {
         var node: JSON.Node = .null
-        try node["y"] &! {
+        try node["y"] & {
             $0 = false
         }
 
         #expect("\(node)" == "\(["y": false] as JSON.Node)")
 
         var nested: JSON.Node = ["a": .null]
-        try nested["a"]["y"] &! {
+        try nested["a"]["y"] & {
             $0 = false
         }
 
@@ -136,13 +136,13 @@ import Testing
     @Test static func ModifyProtected() {
         #expect(throws: JSON.NodeAccessError.protected(nil)) {
             var node: JSON.Node = []
-            try node["y"] &! {
+            try node["y"] & {
                 $0 = true
             }
         }
         #expect(throws: JSON.NodeAccessError.protected(.field("x"))) {
             var node: JSON.Node = ["x": []]
-            try node["x"]["y"] &! {
+            try node["x"]["y"] & {
                 $0 = true
             }
         }
