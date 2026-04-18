@@ -119,9 +119,9 @@ extension JSON.NumberRule: ParsingRule {
                     places = 0
                 }
 
-                if  shift < JSON.Number.Base10.Exp.endIndex,
+                if  shift < JSON.Number.Exp10.endIndex,
                     case (let shifted, false) = units.multipliedReportingOverflow(
-                        by: JSON.Number.Base10.Exp[shift]
+                        by: JSON.Number.Exp10[shift]
                     ) {
                     units = shifted
                 } else {

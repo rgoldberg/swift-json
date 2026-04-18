@@ -1,10 +1,9 @@
 extension JSON.Number {
-    /// A namespace for decimal-related functionality.
-    ///
-    /// This API is used by library functions that are emitted into the client.
-    /// Most library users should not have to call it directly.
-    public enum Base10 {
-        /// Positive powers of 10, up to `10_000_000_000_000_000_000`.
+    @available(
+        *, deprecated, message: """
+        JSON.Number.Base10 is deprecated and will be removed in a future release
+        """
+    ) public enum Base10 {
         public static let Exp: [UInt64] = [
             1,
             10,
