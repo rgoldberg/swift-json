@@ -1,46 +1,36 @@
 extension JSON.Number {
     /// A namespace for decimal-related functionality.
-    ///
-    /// This API is used by library functions that are emitted into the client.
-    /// Most library users should not have to call it directly.
     enum Exp10 {}
 }
 extension JSON.Number.Exp10 {
-    /// Positive powers of 10, up to `10_000_000_000_000_000_000`.
-    private static var powers: InlineArray<20, UInt64> {
-        [
-            1,
-            10,
-            100,
+    static var startIndex: Int { 0 }
+    static var endIndex: Int { 20 }
 
-            1_000,
-            10_000,
-            100_000,
-
-            1_000_000,
-            10_000_000,
-            100_000_000,
-
-            1_000_000_000,
-            10_000_000_000,
-            100_000_000_000,
-
-            1_000_000_000_000,
-            10_000_000_000_000,
-            100_000_000_000_000,
-
-            1_000_000_000_000_000,
-            10_000_000_000_000_000,
-            100_000_000_000_000_000,
-
-            1_000_000_000_000_000_000,
-            10_000_000_000_000_000_000,
-            //  UInt64.max:
-            //  18_446_744_073_709_551_615
-        ]
+    static subscript(power: Int) -> UInt64 {
+        switch power {
+        case 0: 1
+        case 1: 10
+        case 2: 100
+        case 3: 1_000
+        case 4: 10_000
+        case 5: 100_000
+        case 6: 1_000_000
+        case 7: 10_000_000
+        case 8: 100_000_000
+        case 9: 1_000_000_000
+        case 10: 10_000_000_000
+        case 11: 100_000_000_000
+        case 12: 1_000_000_000_000
+        case 13: 10_000_000_000_000
+        case 14: 100_000_000_000_000
+        case 15: 1_000_000_000_000_000
+        case 16: 10_000_000_000_000_000
+        case 17: 100_000_000_000_000_000
+        case 18: 1_000_000_000_000_000_000
+        case 19: 10_000_000_000_000_000_000
+        default: fatalError("power out of representable range")
+        //  UInt64.max:
+        //  18_446_744_073_709_551_615
+        }
     }
-
-    static subscript(power: Int) -> UInt64 { self.powers[power] }
-    static var startIndex: Int { self.powers.startIndex }
-    static var endIndex: Int { self.powers.endIndex }
 }
