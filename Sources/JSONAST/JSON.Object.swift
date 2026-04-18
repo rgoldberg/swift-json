@@ -39,9 +39,11 @@ extension JSON.Object: CustomStringConvertible {
     /// same string.
     public var description: String {
         """
-        {\(self.fields.map {
-                "\(String.init(JSON.Literal<String>.init($0.key.rawValue))):\($0.value)"
-            }.joined(separator: ","))}
+        {\(
+            self.fields.lazy.map {
+                "\(String.init($0.key.quoted)):\($0.value)"
+            }.joined(separator: ",")
+        )}
         """
     }
 }
