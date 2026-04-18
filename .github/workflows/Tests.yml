@@ -82,6 +82,7 @@ jobs:
             destination: ${{ matrix.destination }}
             badge-namespace: ${{ github.workflow }}
 
+
     benchmarks:
         strategy:
             matrix:
@@ -96,18 +97,18 @@ jobs:
         needs: changes
         if: needs.changes.outputs.code_changed == 'true' && github.event_name == 'pull_request'
         steps:
-            -   name: 💖 Install Swift 💖
+            -   name: 🩵 Install Swift 🩵
                 uses: rarestype/swift-install-action@v1
                 with:
                     swift-release: 6.3-RELEASE
 
-            -   name: 💖 Checkout repository 💖
+            -   name: 🩵 Checkout repository 🩵
                 uses: actions/checkout@v6
 
-            -   name: 💖 Run benchmarks 💖
+            -   name: 🩵 Run benchmarks 🩵
                 run: Scripts/Benchmark
 
-            -   name: 💝 Upload benchmark timings 💝
+            -   name: 🩵 Upload benchmark timings 🩵
                 uses: actions/upload-artifact@v7
                 with:
                     name: timings-${{ matrix.runner.arch }}
@@ -120,10 +121,10 @@ jobs:
         name: Benchmark
         needs: benchmarks
         steps:
-            -   name: 💝 Download benchmark timing (x86_64) 💝
+            -   name: 🩵 Download benchmark timing (x86_64) 🩵
                 uses: actions/download-artifact@v8
 
-            -   name: 💝 Generate notes 💝
+            -   name: 🩵 Generate notes 🩵
                 run: |
                     ls -l .
                     summary=$(
@@ -137,3 +138,10 @@ jobs:
                         done
                     )
                     echo "$summary" >> "$GITHUB_STEP_SUMMARY"
+                    echo "$summary" >> "summary_benchmark.md"
+
+            -   name: 🩵 Publish PR comment 🩵
+                uses: marocchino/sticky-pull-request-comment@v3
+                with:
+                    header: benchmark-results
+                    path: Benchmarks/summary_benchmark.md
