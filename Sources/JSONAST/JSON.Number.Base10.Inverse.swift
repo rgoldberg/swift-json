@@ -6,8 +6,7 @@ extension JSON.Number.Base10 {
         ///     - x: A positive exponent. If `x` is `2`, this subscript
         ///         will return `1e-2`.
         ///     - _: A ``BinaryFloatingPoint`` type.
-        static subscript<T>(x: Int, as _: T.Type) -> T
-            where T: BinaryFloatingPoint {
+        static subscript<T>(x: Int, as _: T.Type) -> T where T: BinaryFloatingPoint {
             let inverses: [T] = [
                 1,
                 1e-1,

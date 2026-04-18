@@ -15,6 +15,9 @@ extension JSON.Key {
         self.init(rawValue: codingKey.stringValue)
     }
 }
+extension JSON.Key {
+    var quoted: JSON.Literal<String> { .init(self.rawValue) }
+}
 extension JSON.Key: CustomStringConvertible {
     @inlinable public var description: String {
         self.rawValue

@@ -31,9 +31,9 @@ extension JSON.Number {
         ///     - units: The magnitude, in units of `places`.
         ///     - places: The number of decimal places.
         @inlinable public init(sign: FloatingPointSign, units: UInt64, places: UInt32 = 0) {
-            self.sign       = sign
-            self.units      = units
-            self._places    = places
+            self.sign = sign
+            self.units = units
+            self._places = places
         }
     }
 }
@@ -138,9 +138,9 @@ extension JSON.Number.Inline: CustomStringConvertible {
             case .minus: return "-\(self.units)"
             }
         }
-        let places: Int      = .init(self.places)
         let unpadded: String = .init(self.units)
-        let string: String   = """
+        let places: Int = .init(self.places)
+        let string: String = """
         \(String.init(repeating: "0", count: Swift.max(0, 1 + places - unpadded.count)))\
         \(unpadded)
         """

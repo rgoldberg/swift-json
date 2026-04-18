@@ -16,7 +16,7 @@ extension JSON.Array: CustomStringConvertible {
     /// Reparsing and reserializing this string is guaranteed to return the
     /// same string.
     public var description: String {
-        "[\(self.elements.map(\.description).joined(separator: ","))]"
+        "[\(self.elements.lazy.map(\.description).joined(separator: ","))]"
     }
 }
 extension JSON.Array: ExpressibleByArrayLiteral {

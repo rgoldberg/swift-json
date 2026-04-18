@@ -10,7 +10,7 @@ extension JSON {
     }
 }
 extension JSON.TypecastError {
-    @inlinable public init(invalid json: __shared JSON.Node) {
+    @inlinable public init(invalid json: borrowing JSON.Node) {
         switch json {
         case .null: self = .null
         case .bool: self = .bool
