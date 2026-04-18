@@ -1,10 +1,14 @@
 extension JSON.Number {
-    @available(
-        *, deprecated, message: """
-        JSON.Number.Base10 is deprecated and will be removed in a future release
-        """
-    ) public enum Base10 {
-        public static let Exp: [UInt64] = [
+    /// A namespace for decimal-related functionality.
+    ///
+    /// This API is used by library functions that are emitted into the client.
+    /// Most library users should not have to call it directly.
+    enum Exp10 {}
+}
+extension JSON.Number.Exp10 {
+    /// Positive powers of 10, up to `10_000_000_000_000_000_000`.
+    private static var powers: InlineArray<20, UInt64> {
+        [
             1,
             10,
             100,
@@ -35,4 +39,8 @@ extension JSON.Number {
             //  18_446_744_073_709_551_615
         ]
     }
+
+    static subscript(power: Int) -> UInt64 { self.powers[power] }
+    static var startIndex: Int { self.powers.startIndex }
+    static var endIndex: Int { self.powers.endIndex }
 }
