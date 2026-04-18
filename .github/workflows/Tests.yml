@@ -111,7 +111,7 @@ jobs:
                 uses: actions/upload-artifact@v7
                 with:
                     name: timings-${{ matrix.runner.arch }}
-                    path: *.duration
+                    path: '*.duration'
                     retention-days: 1
                     compression-level: 0
 
