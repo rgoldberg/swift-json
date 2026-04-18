@@ -2,84 +2,52 @@ public import JSONAST
 
 extension JSON {
     @frozen public struct NodeAccessor: ~Copyable {
+        @usableFromInline let crumb: PathComponent?
         @usableFromInline var state: NodeAccess
 
-        @inlinable init(state: NodeAccess) {
+        @inlinable init(crumb: PathComponent?, state: NodeAccess) {
+            self.crumb = crumb
             self.state = state
         }
     }
 }
 extension JSON.NodeAccessor {
-    @inlinable static func protected(_ key: JSON.NodeAccess.PathComponent) -> Self {
-        .init(state: .protected(key))
+    @inlinable static func protected(_ crumb: JSON.PathComponent?) -> Self {
+        .init(crumb: crumb, state: .protected)
     }
 
-    @inlinable static func reserved(_ index: Int) -> Self {
-        .init(state: .reserved(index))
+    @inlinable static func reserved(_ crumb: JSON.PathComponent?, _ index: Int) -> Self {
+        .init(crumb: crumb, state: .reserved(index))
     }
 
-    @inlinable static var writable: Self {
-        .init(state: .writable)
+    @inlinable static func writable(index: Int) -> Self {
+        .init(crumb: .index(index), state: .writable)
     }
 
-    @inlinable static func occupied(_ value: consuming JSON.Node) -> Self {
-        .init(state: .occupied(value))
+    @inlinable static func writable(field: JSON.Key) -> Self {
+        .init(crumb: .field(field), state: .writable)
+    }
+
+    @inlinable static func occupied(index: Int, value: consuming JSON.Node) -> Self {
+        .init(crumb: .index(index), state: .occupied(value))
+    }
+
+    @inlinable static func occupied(field: JSON.Key, value: consuming JSON.Node) -> Self {
+        .init(crumb: .field(field), state: .occupied(value))
     }
 }
 extension JSON.NodeAccessor {
-    @inlinable public subscript(index: Int) -> Self {
-        get {
-            switch self.state {
-            case .protected(let offender):
-                return .protected(offender)
-            case .reserved(let offender):
-                return .reserved(offender)
-            case .writable:
-                return index < 0 ? .reserved(index) : .writable
-            case .occupied(let node):
-                return node[index]
-            }
-        }
-        _modify {
+    @inlinable public subscript(field: JSON.Key) -> Self {
+        _read {
             switch self.state {
             case .protected:
-                yield &self
-
+                yield self
             case .reserved:
-                yield &self
-
+                yield self
             case .writable:
-                if  index < 0 {
-                    var reserved: Self = .reserved(index)
-                    yield &reserved
-                } else {
-                    defer {
-                        // we are allowed to overwrite undefined with a vivified array
-                        if  case .occupied(let node) = self.state {
-                            self = .occupied(.array(JSON.Array.init(value: node, at: index)))
-                        }
-                    }
-                    yield &self
-                }
-
-            case .occupied(var node):
-                self.state = .writable
-                defer { self = .occupied(node) }
-                yield &node[index]
-            }
-        }
-    }
-    @inlinable public subscript(key: JSON.Key) -> Self {
-        get {
-            switch self.state {
-            case .protected(let offender):
-                return .protected(offender)
-            case .reserved(let offender):
-                return .reserved(offender)
-            case .writable:
-                return .writable
+                yield .writable(field: field)
             case .occupied(let node):
-                return node[key]
+                yield node[field, in: self.crumb]
             }
         }
         _modify {
@@ -94,15 +62,63 @@ extension JSON.NodeAccessor {
                 defer {
                     // we are allowed to overwrite undefined with a single-field object
                     if  case .occupied(let node) = self.state {
-                        self = .occupied(.object(JSON.Object.init([(key, node)])))
+                        self = .occupied(
+                            field: field,
+                            value: .object(JSON.Object.init([(field, node)]))
+                        )
                     }
                 }
                 yield &self
 
             case .occupied(var node):
                 self.state = .writable
-                defer { self = .occupied(node) }
-                yield &node[key]
+                defer { self.state = .occupied(node) }
+                yield &node[field, in: self.crumb]
+            }
+        }
+    }
+    @inlinable public subscript(index: Int) -> Self {
+        _read {
+            switch self.state {
+            case .protected:
+                yield self
+            case .reserved:
+                yield self
+            case .writable:
+                yield index < 0 ? .reserved(self.crumb, index) : .writable(index: index)
+            case .occupied(let node):
+                yield node[index, in: self.crumb]
+            }
+        }
+        _modify {
+            switch self.state {
+            case .protected:
+                yield &self
+
+            case .reserved:
+                yield &self
+
+            case .writable:
+                if  index < 0 {
+                    var reserved: Self = .reserved(self.crumb, index)
+                    yield &reserved
+                } else {
+                    defer {
+                        // we are allowed to overwrite undefined with a vivified array
+                        if  case .occupied(let node) = self.state {
+                            self = .occupied(
+                                index: index,
+                                value: .array(JSON.Array.init(value: node, at: index))
+                            )
+                        }
+                    }
+                    yield &self
+                }
+
+            case .occupied(var node):
+                self.state = .writable
+                defer { self.state = .occupied(node) }
+                yield &node[index, in: self.crumb]
             }
         }
     }
@@ -114,7 +130,7 @@ extension JSON.NodeAccessor {
     ) throws(JSON.NodeAccessError) {
         switch self.state {
         case .protected:
-            throw .protected
+            throw .protected(self.crumb)
         case .reserved:
             break
         case .writable:
@@ -129,9 +145,9 @@ extension JSON.NodeAccessor {
     ) throws(JSON.NodeAccessError) {
         switch self.state {
         case .protected:
-            throw .protected
-        case .reserved:
-            throw .reserved
+            throw .protected(self.crumb)
+        case .reserved(let offender):
+            throw .reserved(self.crumb, offender)
         case .writable:
             self.state = .occupied(value)
         case .occupied:
@@ -169,13 +185,13 @@ extension JSON.NodeAccessor {
             var value: JSON.Node? = nil
             try yield(&value)
             if  value != nil {
-                throw JSON.NodeAccessError.protected
+                throw JSON.NodeAccessError.protected(self.crumb)
             }
-        case .reserved:
+        case .reserved(let offender):
             var value: JSON.Node? = nil
             try yield(&value)
             if  value != nil {
-                throw JSON.NodeAccessError.reserved
+                throw JSON.NodeAccessError.reserved(self.crumb, offender)
             }
         case .writable:
             var value: JSON.Node? = nil

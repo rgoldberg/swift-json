@@ -54,13 +54,17 @@ import Testing
         #expect("\(nested)" == "\(["a": ["y": false]] as JSON.Node)")
     }
     @Test static func AssignProtected() {
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(nil)) {
             var node: JSON.Node = []
             try node["y"] &= true
         }
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(.field("x"))) {
             var node: JSON.Node = ["x": []]
             try node["x"]["y"] &= true
+        }
+        #expect(throws: JSON.NodeAccessError.protected(.field("y"))) {
+            var node: JSON.Node = ["x": ["y": []]]
+            try node["x"]["y"]["z"] &= true
         }
     }
 
@@ -130,13 +134,13 @@ import Testing
         #expect("\(nested)" == "\(["a": ["y": false]] as JSON.Node)")
     }
     @Test static func ModifyProtected() {
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(nil)) {
             var node: JSON.Node = []
             try node["y"] &! {
                 $0 = true
             }
         }
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(.field("x"))) {
             var node: JSON.Node = ["x": []]
             try node["x"]["y"] &! {
                 $0 = true

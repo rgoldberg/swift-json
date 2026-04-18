@@ -90,33 +90,41 @@ import Testing
         #expect("\(nested)" == "\(["a": [false]] as JSON.Node)")
     }
     @Test static func AssignProtected() {
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(nil)) {
             var node: JSON.Node = [:]
             try node[0] &= true
         }
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(.field("x"))) {
             var node: JSON.Node = ["x": [:]]
             try node["x"][0] &= true
         }
     }
     @Test static func AssignProtectedReverse() {
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(nil)) {
             var node: JSON.Node = [:]
             try node[-1] &= true
         }
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(.field("x"))) {
             var node: JSON.Node = ["x": [:]]
             try node["x"][-1] &= true
         }
+        #expect(throws: JSON.NodeAccessError.protected(.field("y"))) {
+            var node: JSON.Node = ["x": ["y": [:]]]
+            try node["x"]["y"][-1] &= true
+        }
     }
     @Test static func AssignReserved() {
-        #expect(throws: JSON.NodeAccessError.reserved) {
+        #expect(throws: JSON.NodeAccessError.reserved(nil, -1)) {
             var node: JSON.Node = []
             try node[-1] &= true
         }
-        #expect(throws: JSON.NodeAccessError.reserved) {
+        #expect(throws: JSON.NodeAccessError.reserved(.field("x"), -1)) {
             var node: JSON.Node = ["x": []]
             try node["x"][-1] &= true
+        }
+        #expect(throws: JSON.NodeAccessError.reserved(.field("y"), -1)) {
+            var node: JSON.Node = ["x": ["y": []]]
+            try node["x"]["y"][-1] &= true
         }
     }
 
@@ -169,7 +177,7 @@ import Testing
         #expect("\(node)" == "\([[false]] as JSON.Node)")
     }
     @Test static func ModifyProtected() {
-        #expect(throws: JSON.NodeAccessError.protected) {
+        #expect(throws: JSON.NodeAccessError.protected(.field("x"))) {
             var node: JSON.Node = ["x": [:]]
             try node["x"][0] &! {
                 $0 = true

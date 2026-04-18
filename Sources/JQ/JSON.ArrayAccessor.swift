@@ -10,8 +10,8 @@ extension JSON {
     }
 }
 extension JSON.ArrayAccessor {
-    @inlinable static var protected: Self {
-        .init(state: .protected)
+    @inlinable static func protected(_ key: JSON.PathComponent) -> Self {
+        .init(state: .protected(key))
     }
 
     @inlinable static var writable: Self {
@@ -47,11 +47,11 @@ extension JSON.ArrayAccessor {
         yield: (inout [JSON.Node]?) throws -> ()
     ) throws {
         switch self.state {
-        case .protected:
+        case .protected(let offender):
             var values: [JSON.Node]? = nil
             try yield(&values)
             if  values != nil {
-                throw JSON.NodeAccessError.protected
+                throw JSON.NodeAccessError.protected(offender)
             }
         case .writable:
             var values: [JSON.Node]? = []
