@@ -38,11 +38,11 @@ extension JSON.Number {
     }
 }
 extension JSON.Number.Inline {
-    @available(*, deprecated, message: "prefer initializing 'JSON.Number' directly")
+    @available(*, unavailable, message: "prefer initializing 'JSON.Number' directly")
     @inlinable public init<T>(_ signed: T) where T: SignedInteger {
         self.init(sign: signed < 0 ? .minus : .plus, units: UInt64.init(signed.magnitude))
     }
-    @available(*, deprecated, message: "prefer initializing 'JSON.Number' directly")
+    @available(*, unavailable, message: "prefer initializing 'JSON.Number' directly")
     @inlinable public init<T>(_ unsigned: T) where T: UnsignedInteger {
         self.init(sign: .plus, units: UInt64.init(unsigned))
     }

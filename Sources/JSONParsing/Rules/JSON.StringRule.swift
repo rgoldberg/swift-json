@@ -4,17 +4,15 @@ extension JSON {
     /// Matches a string literal.
     ///
     /// String literals always begin and end with an ASCII double quote character (`"`).
-    enum StringRule<Location> {
-    }
+    enum StringRule<Location> {}
 }
 extension JSON.StringRule: ParsingRule {
     typealias Terminal = UInt8
 
     static func parse<Source>(
         _ input: inout ParsingInput<some ParsingDiagnostics<Source>>
-    ) throws -> String
-        where   Source.Element == Terminal,
-        Source.Index == Location {
+    ) throws(PatternMatchingError) -> String
+        where Source.Element == Terminal, Source.Index == Location {
         typealias DoubleQuote = UnicodeEncoding<Location, UInt8>.DoubleQuote
 
         try input.parse(as: DoubleQuote.self)

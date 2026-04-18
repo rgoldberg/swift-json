@@ -5,15 +5,14 @@ extension JSON.NodeRule.Object {
     ///
     /// A key-value expression consists of a ``JSON.StringRule``, a ``JSON.ColonRule``, and
     /// a recursive instance of ``JSON.NodeRule``.
-    enum Item {
-    }
+    enum Item {}
 }
 extension JSON.NodeRule.Object.Item: ParsingRule {
     typealias Terminal = UInt8
 
     static func parse<Source>(
         _ input: inout ParsingInput<some ParsingDiagnostics<Source>>
-    ) throws -> (
+    ) throws(PatternMatchingError) -> (
         key: JSON.Key,
         value: JSON.Node
     )

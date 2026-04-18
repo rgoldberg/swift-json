@@ -6,7 +6,7 @@ extension JSON.NodeRule {
 
         static func parse<Source>(
             _ input: inout ParsingInput<some ParsingDiagnostics<Source>>
-        ) throws -> JSON.Number
+        ) throws(PatternMatchingError) -> JSON.Number
             where Source.Element == Terminal, Source.Index == Location {
 
             if  let _: Void = input.parse(

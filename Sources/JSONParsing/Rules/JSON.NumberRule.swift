@@ -18,17 +18,15 @@ extension JSON {
     */
     /// Numeric literals may not begin with a prefix `+` sign, although the
     /// exponent field can use a prefix `+`.
-    enum NumberRule<Location> {
-    }
+    enum NumberRule<Location> {}
 }
 extension JSON.NumberRule: ParsingRule {
     typealias Terminal = UInt8
 
     static func parse<Source>(
         _ input: inout ParsingInput<some ParsingDiagnostics<Source>>
-    ) throws -> JSON.Number
-        where   Source.Element == Terminal,
-        Source.Index == Location {
+    ) throws(PatternMatchingError) -> JSON.Number
+        where Source.Element == Terminal, Source.Index == Location {
         /// ASCII decimal digit terminals.
         typealias DecimalDigit<T> = UnicodeDigit<Location, UInt8, T>.Decimal
             where T: BinaryInteger

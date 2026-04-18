@@ -35,6 +35,6 @@ extension JSON.Object {
 extension JSON.Object: LosslessStringConvertible {
     /// See ``init(parsing:) (String)``.
     public init?(_ description: String) {
-        do      { try self.init(parsing: description) } catch   { return nil }
+        do { try self.init(parsing: description) } catch { return nil }
     }
 }
