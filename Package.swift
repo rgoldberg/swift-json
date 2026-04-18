@@ -6,10 +6,11 @@ let package: Package = .init(
     name: "swift-json",
     platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .watchOS(.v11), .visionOS(.v2)],
     products: [
+        .library(name: "JavaScriptPersistence", targets: ["JavaScriptPersistence"]),
+        .library(name: "JQ", targets: ["JQ"]),
         .library(name: "JSON", targets: ["JSON"]),
         .library(name: "JSONAST", targets: ["JSONAST"]),
         .library(name: "JSONLegacy", targets: ["JSONLegacy"]),
-        .library(name: "JavaScriptPersistence", targets: ["JavaScriptPersistence"]),
 
         .library(name: "_JSON_SnippetsAnchor", targets: ["_JSON_SnippetsAnchor"]),
     ],
@@ -60,6 +61,13 @@ let package: Package = .init(
         ),
 
         .target(
+            name: "JQ",
+            dependencies: [
+                .target(name: "JSONAST"),
+            ]
+        ),
+
+        .target(
             name: "JavaScriptPersistence",
             dependencies: [
                 .target(name: "JSON"),
@@ -70,6 +78,13 @@ let package: Package = .init(
             name: "JSONTests",
             dependencies: [
                 .target(name: "JSON"),
+            ]
+        ),
+        .testTarget(
+            name: "JQTests",
+            dependencies: [
+                .target(name: "JSON"),
+                .target(name: "JQ"),
             ]
         ),
 
