@@ -6,6 +6,6 @@ let invalid: String = """
 """
 do {
     let _: JSON.Node = try .init(parsing: invalid)
-} catch is Pattern.UnexpectedValueError {
-    print("JSON failed to parse!")
+} catch let error {
+    print("JSON failed to parse! (\(error))")
 }

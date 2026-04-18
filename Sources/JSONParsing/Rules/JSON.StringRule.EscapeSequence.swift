@@ -4,17 +4,15 @@ extension JSON.StringRule {
     /// Matches a sequence of escaped UTF-16 code units.
     ///
     /// A UTF-16 escape sequence consists of `\u`, followed by four hexadecimal digits.
-    enum EscapeSequence {
-    }
+    enum EscapeSequence {}
 }
 extension JSON.StringRule.EscapeSequence: ParsingRule {
     typealias Terminal = UInt8
 
     static func parse<Source>(
         _ input: inout ParsingInput<some ParsingDiagnostics<Source>>
-    ) throws -> String
-        where   Source.Element == Terminal,
-        Source.Index == Location {
+    ) throws(PatternMatchingError) -> String
+        where Source.Element == Terminal, Source.Index == Location {
         typealias HexDigit = UnicodeDigit<Location, UInt8, UInt16>.Hex
         typealias ASCII = UnicodeEncoding<Location, UInt8>
 
@@ -35,7 +33,7 @@ extension JSON.StringRule.EscapeSequence: ParsingRule {
                 if let scalar: Unicode.Scalar = Unicode.Scalar.init(value) {
                     unescaped.append(Character.init(scalar))
                 } else {
-                    throw JSON.InvalidUnicodeScalarError.init(value: value)
+                    throw .arbitrary(JSON.InvalidUnicodeScalarError.init(value: value))
                 }
             }
 

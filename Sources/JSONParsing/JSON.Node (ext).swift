@@ -37,6 +37,6 @@ extension JSON.Node {
 extension JSON.Node: LosslessStringConvertible {
     /// See ``init(parsingFragment:) (String)``.
     public init?(_ description: String) {
-        do      { try self.init(parsingFragment: description) } catch   { return nil }
+        do { try self.init(parsingFragment: description) } catch { return nil }
     }
 }

@@ -5,17 +5,15 @@ extension JSON {
     ///
     /// Only use this if you are doing manual JSON parsing. Most web services
     /// should send complete ``JSON.RootRule`` messages through their public APIs.
-    enum NodeRule<Location> {
-    }
+    enum NodeRule<Location> {}
 }
 extension JSON.NodeRule: ParsingRule {
     typealias Terminal = UInt8
 
     static func parse<Source>(
         _ input: inout ParsingInput<some ParsingDiagnostics<Source>>
-    ) throws -> JSON.Node
-        where   Source.Element == Terminal,
-        Source.Index == Location {
+    ) throws(PatternMatchingError) -> JSON.Node
+        where Source.Element == Terminal, Source.Index == Location {
         if  let number: JSON.Number = input.parse(as: JSON.NumberRule<Location>?.self) {
             return .number(number)
         } else if

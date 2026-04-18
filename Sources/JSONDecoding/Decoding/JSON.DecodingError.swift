@@ -21,7 +21,7 @@ extension JSON.DecodingError: Equatable where Location: Equatable {
     /// the underlying ``Error`` existentials are not ``Equatable``.
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.location == rhs.location &&
-        lhs.underlying == rhs.underlying
+        lhs.underlying ~= rhs.underlying
     }
 }
 extension JSON.DecodingError: TraceableError {

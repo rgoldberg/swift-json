@@ -6,15 +6,14 @@ extension JSON.NodeRule {
     /// Array literals begin and end with square brackets (`[` and `]`), and
     /// recursively contain instances of ``JSON.NodeRule`` separated by ``JSON.CommaRule``s.
     /// Trailing commas (a JSON5 extension) are not allowed.
-    enum Array {
-    }
+    enum Array {}
 }
 extension JSON.NodeRule.Array: ParsingRule {
     typealias Terminal = UInt8
 
     static func parse<Source>(
         _ input: inout ParsingInput<some ParsingDiagnostics<Source>>
-    ) throws -> [JSON.Node]
+    ) throws(PatternMatchingError) -> [JSON.Node]
         where   Source.Element == Terminal,
         Source.Index == Location {
         try input.parse(as: JSON.BracketLeftRule<Location>.self)
