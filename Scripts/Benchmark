@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# this is an easy way to obtain a big JSON file without having to commit it to the repo history
+subject='Swift.symbols.json'
+swift symbolgraph-extract \
+    -module-name Swift \
+    -output-dir Benchmarks
+rm -f Benchmarks/*"@${subject}"
+
+swift build -c release \
+    --package-path Benchmarks
+
+Benchmarks/.build/release/benchmark "Benchmarks/${subject}" > ${subject}.duration
