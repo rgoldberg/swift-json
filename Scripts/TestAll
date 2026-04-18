@@ -6,6 +6,9 @@ export WARNINGS_AS_ERRORS=1
 swift --version
 
 swift package dollup --allow-writing-to-package-directory
+swift package \
+    --package-path Benchmarks \
+    dollup --allow-writing-to-package-directory
 git diff --exit-code
 
 swift test

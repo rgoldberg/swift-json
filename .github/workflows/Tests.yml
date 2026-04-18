@@ -34,13 +34,12 @@ jobs:
         runs-on: ubuntu-24.04
         name: Ubuntu 24.04
         needs: changes
-        if: ${{ needs.changes.outputs.code_changed == 'true' }}
+        if: needs.changes.outputs.code_changed == 'true'
         steps:
             -   name: 💖 Install Swift 💖
                 uses: rarestype/swift-install-action@v1
                 with:
-                    swift-prefix: "swift-6.3-release/ubuntu2404/swift-6.3-RELEASE"
-                    swift-id: "swift-6.3-RELEASE-ubuntu24.04"
+                    swift-release: 6.3-RELEASE
 
             -   name: 💖 Checkout repository 💖
                 uses: actions/checkout@v6
@@ -55,7 +54,7 @@ jobs:
     macOS:
         runs-on: macos-26
         needs: changes
-        if: ${{ needs.changes.outputs.code_changed == 'true' }}
+        if: needs.changes.outputs.code_changed == 'true'
         steps:
             -   name: 💖 Checkout repository 💖
                 uses: actions/checkout@v6
@@ -75,10 +74,63 @@ jobs:
             matrix:
                 destination: [iOS, tvOS, visionOS, watchOS]
         needs: changes
-        if: ${{ needs.changes.outputs.code_changed == 'true' }}
+        if: needs.changes.outputs.code_changed == 'true'
         name: ${{ matrix.destination }}
         uses: rarestype/swift-device-action/.github/workflows/build.yml@v1
         with:
             xcode-scheme: 'swift-json-Package'
             destination: ${{ matrix.destination }}
             badge-namespace: ${{ github.workflow }}
+
+    benchmarks:
+        strategy:
+            matrix:
+                runner:
+                    -   id: ubuntu-24.04
+                        arch: x86_64
+                    -   id: ubuntu-24.04-arm
+                        arch: aarch64
+
+        runs-on: ${{ matrix.runner.id }}
+        name: Benchmark (${{ matrix.runner.arch }})
+        needs: changes
+        if: needs.changes.outputs.code_changed == 'true' && github.event_name == 'pull_request'
+        steps:
+            -   name: 💖 Install Swift 💖
+                uses: rarestype/swift-install-action@v1
+                with:
+                    swift-release: 6.3-RELEASE
+
+            -   name: 💖 Checkout repository 💖
+                uses: actions/checkout@v6
+
+            -   name: 💖 Run benchmarks 💖
+                run: Scripts/Benchmark
+
+            -   name: 💝 Upload benchmark timings 💝
+                uses: actions/upload-artifact@v7
+                with:
+                    name: timings-${{ matrix.runner.arch }}
+                    path: *.duration
+                    retention-days: 1
+                    compression-level: 0
+
+    benchmarks-collate:
+        runs-on: ubuntu-latest
+        name: Benchmark
+        needs: benchmarks
+        steps:
+            -   name: 💝 Download benchmark timing (x86_64) 💝
+                uses: actions/download-artifact@v8
+
+            -   name: 💝 Generate notes 💝
+                run: |
+                    ls -l .
+                    summary=$(
+                        echo "| subject | duration |"
+                        echo "|---|---|"
+                        for id in "Swift.symbols.json"; do
+                            echo "| ${id} | $(cat "${id}.duration") |"
+                        done
+                    )
+                    echo "$summary" >> "$GITHUB_STEP_SUMMARY"

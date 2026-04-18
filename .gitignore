@@ -1,7 +1,12 @@
+/Benchmarks/.build
+/Benchmarks/.build.*
+/Benchmarks/Package.resolved
+/Benchmarks/*.json
+
 /.build
 /.build.*
 /.ssgc
 /.vscode
-/.swift-version
+/*.duration
 
 /Package.resolved
