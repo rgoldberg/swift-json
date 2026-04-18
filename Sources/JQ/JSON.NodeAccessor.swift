@@ -10,24 +10,72 @@ extension JSON {
     }
 }
 extension JSON.NodeAccessor {
-    @inlinable static func protected(_ key: JSON.Key) -> Self {
+    @inlinable static func protected(_ key: JSON.NodeAccess.PathComponent) -> Self {
         .init(state: .protected(key))
+    }
+
+    @inlinable static func reserved(_ index: Int) -> Self {
+        .init(state: .reserved(index))
     }
 
     @inlinable static var writable: Self {
         .init(state: .writable)
     }
 
-    @inlinable static func occupied(_ value: JSON.Node) -> Self {
+    @inlinable static func occupied(_ value: consuming JSON.Node) -> Self {
         .init(state: .occupied(value))
     }
 }
 extension JSON.NodeAccessor {
+    @inlinable public subscript(index: Int) -> Self {
+        get {
+            switch self.state {
+            case .protected(let offender):
+                return .protected(offender)
+            case .reserved(let offender):
+                return .reserved(offender)
+            case .writable:
+                return index < 0 ? .reserved(index) : .writable
+            case .occupied(let node):
+                return node[index]
+            }
+        }
+        _modify {
+            switch self.state {
+            case .protected:
+                yield &self
+
+            case .reserved:
+                yield &self
+
+            case .writable:
+                if  index < 0 {
+                    var reserved: Self = .reserved(index)
+                    yield &reserved
+                } else {
+                    defer {
+                        // we are allowed to overwrite undefined with a vivified array
+                        if  case .occupied(let node) = self.state {
+                            self = .occupied(.array(JSON.Array.init(value: node, at: index)))
+                        }
+                    }
+                    yield &self
+                }
+
+            case .occupied(var node):
+                self.state = .writable
+                defer { self = .occupied(node) }
+                yield &node[index]
+            }
+        }
+    }
     @inlinable public subscript(key: JSON.Key) -> Self {
         get {
             switch self.state {
             case .protected(let offender):
                 return .protected(offender)
+            case .reserved(let offender):
+                return .reserved(offender)
             case .writable:
                 return .writable
             case .occupied(let node):
@@ -39,8 +87,12 @@ extension JSON.NodeAccessor {
             case .protected:
                 yield &self
 
+            case .reserved:
+                yield &self
+
             case .writable:
                 defer {
+                    // we are allowed to overwrite undefined with a single-field object
                     if  case .occupied(let node) = self.state {
                         self = .occupied(.object(JSON.Object.init([(key, node)])))
                     }
@@ -63,6 +115,8 @@ extension JSON.NodeAccessor {
         switch self.state {
         case .protected:
             throw .protected
+        case .reserved:
+            break
         case .writable:
             break
         case .occupied:
@@ -76,6 +130,8 @@ extension JSON.NodeAccessor {
         switch self.state {
         case .protected:
             throw .protected
+        case .reserved:
+            throw .reserved
         case .writable:
             self.state = .occupied(value)
         case .occupied:
@@ -90,6 +146,8 @@ extension JSON.NodeAccessor {
     ) throws(E) -> T? {
         switch self.state {
         case .protected:
+            return nil
+        case .reserved:
             return nil
         case .writable:
             return nil
@@ -112,6 +170,12 @@ extension JSON.NodeAccessor {
             try yield(&value)
             if  value != nil {
                 throw JSON.NodeAccessError.protected
+            }
+        case .reserved:
+            var value: JSON.Node? = nil
+            try yield(&value)
+            if  value != nil {
+                throw JSON.NodeAccessError.reserved
             }
         case .writable:
             var value: JSON.Node? = nil
