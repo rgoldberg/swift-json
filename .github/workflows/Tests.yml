@@ -129,8 +129,8 @@ jobs:
                 run: |
                     ls -l .
                     summary=$(
-                        echo "| architecture | subject | duration |"
-                        echo "| ------------ | ------- | -------- |"
+                        echo "| architecture | subject | benchmark duration |"
+                        echo "| ------------ | ------- | ------------------ |"
                         for arch in x86_64 aarch64; do
                             for id in "Swift.symbols.json"; do
                                 timing="timings-${arch}/${id}.duration"
