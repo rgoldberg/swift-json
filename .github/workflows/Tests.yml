@@ -127,10 +127,13 @@ jobs:
                 run: |
                     ls -l .
                     summary=$(
-                        echo "| subject | duration |"
-                        echo "|---|---|"
-                        for id in "Swift.symbols.json"; do
-                            echo "| ${id} | $(cat "${id}.duration") |"
+                        echo "| architecture | subject | duration |"
+                        echo "| ------------ | ------- | -------- |"
+                        for arch in x86_64 aarch64; do
+                            for id in "Swift.symbols.json"; do
+                                timing="timings-${arch}/${id}.duration"
+                                echo "| ${arch} | ${id} | $(cat "$timing") |"
+                            done
                         done
                     )
                     echo "$summary" >> "$GITHUB_STEP_SUMMARY"

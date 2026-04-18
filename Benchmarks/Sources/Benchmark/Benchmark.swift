@@ -15,8 +15,9 @@ struct Benchmark {
 
     func run() throws {
         let clock: ContinuousClock = .init()
+        let bytes: [UInt8] = try self.input.read()
         let duration: Duration = try clock.measure {
-            let json: JSON = .init(utf8: try self.input.read()[...])
+            let json: JSON = .init(utf8: bytes[...])
             let root: JSON.Node = try .init(parsing: json)
             Self._blackhole(root)
         }
