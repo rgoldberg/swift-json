@@ -14,8 +14,7 @@ extension JSON.NodeRule.Array: ParsingRule {
     static func parse<Source>(
         _ input: inout ParsingInput<some ParsingDiagnostics<Source>>
     ) throws(PatternMatchingError) -> [JSON.Node]
-        where   Source.Element == Terminal,
-        Source.Index == Location {
+        where Source.Element == Terminal, Source.Index == Location {
         try input.parse(as: JSON.BracketLeftRule<Location>.self)
         var elements: [JSON.Node]
         if let head: JSON.Node = try? input.parse(as: JSON.NodeRule<Location>.self) {
