@@ -29,27 +29,61 @@ extension JSON.ArrayAccessor {
     }
 }
 extension JSON.ArrayAccessor {
+    /// Modify an existing array at the accessed path, returning nil if no such array exists, or
+    /// if the accessed path is invalid.
     @discardableResult
     @inlinable public static func &? <E, T>(
         self: inout Self,
         yield: (inout JSON.Array) throws(E) -> T
     ) throws(E) -> T? {
-        switch self.state {
-        case .protected:
-            return nil
-        case .reserved:
-            return nil
-        case .writable:
-            return nil
-        case .occupied(var array):
+        if case .occupied(var array) = self.state {
             self.state = .writable
             defer {
                 self.state = .occupied(array)
             }
             return try yield(&array)
+        } else {
+            return nil
         }
     }
 
+    /// Modify the array at the accessed path, creating an empty array in the tree if it does
+    /// not exist.
+    ///
+    /// Use this when you are confident that the array must be written, and expect to receive
+    /// an error if incompatible data already exists in the accessed location.
+    @inlinable public static func & (
+        self: inout Self,
+        yield: (inout JSON.Array) throws -> ()
+    ) throws {
+        switch self.state {
+        case .protected:
+            throw JSON.NodeAccessError.protected(self.crumb)
+
+        case .reserved(let offender):
+            throw JSON.NodeAccessError.reserved(self.crumb, offender)
+
+        case .writable:
+            var array: JSON.Array = []
+            try yield(&array)
+            self.state = .occupied(array)
+
+        case .occupied(let value):
+            var array: JSON.Array = consume value
+            self.state = .writable
+            defer {
+                self.state = .occupied(array)
+            }
+            try yield(&array)
+        }
+    }
+
+    /// Modify the array at the accessed path, allowing the closure to create, update, or delete
+    /// it. Assigning a value to a node that was originally nil creates it, likewise,
+    /// assigning nil to a node that was originally non-nil deletes it.
+    ///
+    /// If the accessed path is not writable, and the node is assigned a value in the
+    /// closure — even an empty array — a ``NodeAccessError`` is thrown.
     @inlinable public static func & (
         self: inout Self,
         yield: (inout JSON.Array?) throws -> ()
@@ -70,7 +104,7 @@ extension JSON.ArrayAccessor {
             }
 
         case .writable:
-            var array: JSON.Array? = []
+            var array: JSON.Array? = nil
             try yield(&array)
             if  let array: JSON.Array {
                 self.state = .occupied(array)
