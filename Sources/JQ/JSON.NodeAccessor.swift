@@ -213,8 +213,8 @@ extension JSON.NodeAccessor {
         }
     }
 
-    /// Modify the node at the accessed path, creating it with a default value of ``JSON/null``,
-    /// if it does not exist.
+    /// Modify the node at the accessed path, creating it with a default value of
+    /// ``JSON.Node/null``, if it does not exist.
     ///
     /// Use this when you are confident that the node must be written, and expect to receive
     /// an error if incompatible data already exists in the accessed location.
@@ -247,7 +247,7 @@ extension JSON.NodeAccessor {
     /// assigning nil to a node that was originally non-nil deletes it.
     ///
     /// If the accessed path is not writable, and the node is assigned a value in the
-    /// closure — including an explicit ``JSON/null`` — a ``NodeAccessError`` is thrown.
+    /// closure — including an explicit ``JSON.Node/null`` — a ``NodeAccessError`` is thrown.
     @inlinable public static func & (
         self: inout Self,
         yield: (inout JSON.Node?) throws -> ()
