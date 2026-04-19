@@ -14,6 +14,9 @@ let package: Package = .init(
 
         .library(name: "_JSON_SnippetsAnchor", targets: ["_JSON_SnippetsAnchor"]),
     ],
+    traits: [
+        .trait(name: "_ExperimentalJQ"),
+    ],
     dependencies: [
         .package(url: "https://github.com/ordo-one/dollup", from: "1.0.1"),
         .package(url: "https://github.com/rarestype/gram", from: "2.0.0"),
