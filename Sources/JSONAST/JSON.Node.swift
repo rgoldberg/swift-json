@@ -20,20 +20,20 @@ extension JSON {
     }
 }
 extension JSON.Node {
-    /// A shorthand for constructing the payload of ``string(_:) (Literal<String>)``.
+    /// A shorthand for constructing the payload of ``string(_:) [case]``.
     @inlinable public static func string(_ unescaped: consuming String) -> Self {
         .string(JSON.Literal<String>.init(unescaped))
     }
 
-    /// A shorthand for constructing the payload of ``number(_:) (Number)``.
+    /// A shorthand for constructing the payload of ``number(_:) [case]``.
     @inlinable public static func number<T>(_ value: T) -> Self where T: UnsignedInteger {
         .number(JSON.Number.init(value))
     }
-    /// A shorthand for constructing the payload of ``number(_:) (Number)``.
+    /// A shorthand for constructing the payload of ``number(_:) [case]``.
     @inlinable public static func number<T>(_ value: T) -> Self where T: SignedInteger {
         .number(JSON.Number.init(value))
     }
-    /// A shorthand for constructing the payload of ``number(_:) (Number)``.
+    /// A shorthand for constructing the payload of ``number(_:) [case]``.
     @inlinable public static func number<T>(
         _ value: T
     ) -> Self where T: BinaryFloatingPoint & LosslessStringConvertible {
