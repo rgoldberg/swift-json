@@ -160,6 +160,22 @@ extension JSON.NodeAccessor {
     }
 }
 extension JSON.NodeAccessor {
+    @inlinable public var node: JSON.Node? {
+        get throws(JSON.NodeAccessError) {
+            switch self.state {
+            case .protected:
+                throw JSON.NodeAccessError.protected(self.crumb)
+            case .reserved(let offender):
+                throw JSON.NodeAccessError.reserved(self.crumb, offender)
+            case .writable:
+                return nil
+            case .occupied(let value):
+                return value
+            }
+        }
+    }
+}
+extension JSON.NodeAccessor {
     /// Delete the node at the accessed path, throwing a ``NodeAccessError`` if the location is
     /// not writable and data already exists there.
     @inlinable public static func &= (
@@ -218,7 +234,7 @@ extension JSON.NodeAccessor {
     ///
     /// Use this when you are confident that the node must be written, and expect to receive
     /// an error if incompatible data already exists in the accessed location.
-    @inlinable public static func & (
+    @inlinable public static func &! (
         self: inout Self,
         yield: (inout JSON.Node) throws -> ()
     ) throws {
@@ -279,33 +295,6 @@ extension JSON.NodeAccessor {
                 self.state = value.map { .occupied($0) } ?? .writable
             }
             try yield(&value)
-        }
-    }
-
-    @inlinable public static func |? <E, T>(
-        self: borrowing Self,
-        yield: (JSON.Node) throws(E) -> T
-    ) throws(E) -> T? {
-        if  case .occupied(let value) = self.state {
-            return try yield(value)
-        } else {
-            return nil
-        }
-    }
-
-    @inlinable public static func | <T>(
-        self: borrowing Self,
-        yield: (JSON.Node) throws -> T
-    ) throws -> T {
-        switch self.state {
-        case .protected:
-            throw JSON.NodeAccessError.protected(self.crumb)
-        case .reserved(let offender):
-            throw JSON.NodeAccessError.reserved(self.crumb, offender)
-        case .writable:
-            return try yield(.null)
-        case .occupied(let value):
-            return try yield(value)
         }
     }
 }
