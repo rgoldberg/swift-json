@@ -264,4 +264,14 @@ import Testing
         let nested: JSON.Node = [[:]]
         #expect(nil == (nested[0][] |? { "\($0)" }))
     }
+
+    @Test static func Append() throws {
+        var node: JSON.Node = .null
+        try node[] &! { $0.elements.append("x") }
+        #expect("\(node)" == "\(["x"] as JSON.Node)")
+
+        var nested: JSON.Node = [:]
+        try nested["a"][] &! { $0.elements.append("x") }
+        #expect("\(nested)" == "\(["a": ["x"]] as JSON.Node)")
+    }
 }

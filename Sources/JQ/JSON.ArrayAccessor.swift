@@ -52,7 +52,7 @@ extension JSON.ArrayAccessor {
     ///
     /// Use this when you are confident that the array must be written, and expect to receive
     /// an error if incompatible data already exists in the accessed location.
-    @inlinable public static func & (
+    @inlinable public static func &! (
         self: inout Self,
         yield: (inout JSON.Array) throws -> ()
     ) throws {
@@ -135,14 +135,14 @@ extension JSON.ArrayAccessor {
     @inlinable public static func | <T>(
         self: borrowing Self,
         yield: (JSON.Node) throws -> T
-    ) throws -> [T] {
+    ) throws -> [T]? {
         switch self.state {
         case .protected:
             throw JSON.NodeAccessError.protected(self.crumb)
         case .reserved(let offender):
             throw JSON.NodeAccessError.reserved(self.crumb, offender)
         case .writable:
-            return []
+            return nil
         case .occupied(let array):
             return try array.elements.map(yield)
         }
