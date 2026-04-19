@@ -78,7 +78,7 @@ extension IntegerOverflow {
         where Signed: SignedInteger & JSONDecodable {
         let field: JSON.FieldDecoder<Never?> = .init(
             key: nil,
-            value: .number(.init(value))
+            value: .number(value)
         )
 
         #expect(throws: JSON.DecodingError<Never?>.self) {
@@ -91,7 +91,7 @@ extension IntegerOverflow {
     ) throws where Signed: SignedInteger & JSONDecodable {
         let field: JSON.FieldDecoder<Never?> = .init(
             key: nil,
-            value: .number(.init(value))
+            value: .number(value)
         )
 
         #expect(try field.decode() == value)

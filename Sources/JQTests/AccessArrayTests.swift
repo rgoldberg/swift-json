@@ -145,10 +145,10 @@ import Testing
 
         var nested: JSON.Node = [[[false, true], [true, false]]]
         try nested[0][1] & {
-            $0 = .number(.init(1))
+            $0 = .number(1)
         }
 
-        #expect("\(nested)" == "\([[[false, true], .number(.init(1))]] as JSON.Node)")
+        #expect("\(nested)" == "\([[[false, true], .number(1)]] as JSON.Node)")
 
         try nested[0][] & {
             $0 = [true]

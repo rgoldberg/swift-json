@@ -20,48 +20,45 @@ extension JSON {
     }
 }
 extension JSON.Node {
-    // TODO: optimize this, it should operate at the utf8 level, and be @inlinable
+    /// A shorthand for constructing the payload of ``string(_:) (Literal<String>)``.
+    @inlinable public static func string(_ unescaped: consuming String) -> Self {
+        .string(JSON.Literal<String>.init(unescaped))
+    }
 
-    /// Escapes and formats a string as a JSON string literal, including the
-    /// beginning and ending quote characters. This function is used for debug reflection only;
-    /// it is less efficient than the UTF-8 escaping implementation used by the encoder.
-    ///
-    /// -   Parameters:
-    ///     - string: A string to escape.
-    /// -   Returns: A string literal, which includes the `""` delimiters.
-    ///
-    /// This function escapes the following characters: `"`, `\`, `\b`, `\t`, `\n`,
-    /// `\f`, and `\r`. It does not escape forward slashes (`/`).
-    ///
-    /// JSON string literals may contain unicode characters, even after escaping.
-    /// Do not assume the output of this function is ASCII.
-    ///
-    /// >   Important: This function should *not* be called on an input to the ``string(_:)``
-    ///     case  constructor. The library performs string escaping lazily; calling this
-    ///     function explicitly will double-escape the input.
-    // static
-    // func escape<S>(_ string:S) -> String where S:StringProtocol
-    // {
-    //     var escaped:String = "\""
-    //     for character:Character in string
-    //     {
-    //         switch character
-    //         {
-    //         case "\"":      escaped += "\\\""
-    //         case "\\":      escaped += "\\\\"
-    //         // slash escape is not mandatory, and does not improve legibility
-    //         // case "/":       escaped += "\\/"
-    //         case "\u{08}":  escaped += "\\b"
-    //         case "\u{09}":  escaped += "\\t"
-    //         case "\u{0A}":  escaped += "\\n"
-    //         case "\u{0C}":  escaped += "\\f"
-    //         case "\u{0D}":  escaped += "\\r"
-    //         default:        escaped.append(character)
-    //         }
-    //     }
-    //     escaped += "\""
-    //     return escaped
-    // }
+    /// A shorthand for constructing the payload of ``number(_:) (Number)``.
+    @inlinable public static func number<T>(_ value: T) -> Self where T: UnsignedInteger {
+        .number(JSON.Number.init(value))
+    }
+    /// A shorthand for constructing the payload of ``number(_:) (Number)``.
+    @inlinable public static func number<T>(_ value: T) -> Self where T: SignedInteger {
+        .number(JSON.Number.init(value))
+    }
+    /// A shorthand for constructing the payload of ``number(_:) (Number)``.
+    @inlinable public static func number<T>(
+        _ value: T
+    ) -> Self where T: BinaryFloatingPoint & LosslessStringConvertible {
+        .number(JSON.Number.init(value))
+    }
+}
+extension JSON.Node: ExpressibleByDictionaryLiteral {
+    @inlinable public init(dictionaryLiteral: (JSON.Key, Self)...) {
+        self = .object(.init(dictionaryLiteral))
+    }
+}
+extension JSON.Node: ExpressibleByArrayLiteral {
+    @inlinable public init(arrayLiteral: Self...) {
+        self = .array(.init(arrayLiteral))
+    }
+}
+extension JSON.Node: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
+    @inlinable public init(stringLiteral: String) {
+        self = .string(stringLiteral)
+    }
+}
+extension JSON.Node: ExpressibleByBooleanLiteral {
+    @inlinable public init(booleanLiteral: Bool) {
+        self = .bool(booleanLiteral)
+    }
 }
 extension JSON.Node: CustomStringConvertible {
     /// Returns this value serialized as a minified string.
@@ -80,27 +77,6 @@ extension JSON.Node: CustomStringConvertible {
         }
     }
 }
-extension JSON.Node: ExpressibleByDictionaryLiteral {
-    @inlinable public init(dictionaryLiteral: (JSON.Key, Self)...) {
-        self = .object(.init(dictionaryLiteral))
-    }
-}
-extension JSON.Node: ExpressibleByArrayLiteral {
-    @inlinable public init(arrayLiteral: Self...) {
-        self = .array(.init(arrayLiteral))
-    }
-}
-extension JSON.Node: ExpressibleByStringLiteral {
-    @inlinable public init(stringLiteral: String) {
-        self = .string(JSON.Literal<String>.init(stringLiteral))
-    }
-}
-extension JSON.Node: ExpressibleByBooleanLiteral {
-    @inlinable public init(booleanLiteral: Bool) {
-        self = .bool(booleanLiteral)
-    }
-}
-
 extension JSON.Node {
     /// Promotes a `nil` result to a thrown ``TypecastError``.
     ///
