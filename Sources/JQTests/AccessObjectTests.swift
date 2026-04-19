@@ -71,16 +71,16 @@ import Testing
     @Test static func Modify() throws {
         var node: JSON.Node = ["a": ["x": false, "y": true]]
         try node["a"]["y"] & {
-            $0 = .number(.init(1))
+            $0 = .number(1)
         }
 
-        #expect("\(node)" == "\(["a": ["x": false, "y": .number(.init(1))]] as JSON.Node)")
+        #expect("\(node)" == "\(["a": ["x": false, "y": .number(1)]] as JSON.Node)")
 
         try node["a"] & {
-            $0 = .number(.init(1))
+            $0 = .number(1)
         }
 
-        #expect("\(node)" == "\(["a": .number(.init(1))] as JSON.Node)")
+        #expect("\(node)" == "\(["a": .number(1)] as JSON.Node)")
 
         try node["a"] & {
             $0 = [true, false]

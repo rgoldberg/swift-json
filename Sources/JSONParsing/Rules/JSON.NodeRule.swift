@@ -18,7 +18,7 @@ extension JSON.NodeRule: ParsingRule {
             return .number(number)
         } else if
             let string: String = input.parse(as: JSON.StringRule<Location>?.self) {
-            return .string(JSON.Literal<String>.init(string))
+            return .string(string)
         } else if
             let items: [(JSON.Key, JSON.Node)] = input.parse(as: Object?.self) {
             return .object(.init(items))
