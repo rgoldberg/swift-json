@@ -160,6 +160,8 @@ extension JSON.NodeAccessor {
     }
 }
 extension JSON.NodeAccessor {
+    /// Delete the node at the accessed path, throwing a ``NodeAccessError`` if the location is
+    /// not writable and data already exists there.
     @inlinable public static func &= (
         self: inout Self,
         delete: Never?
@@ -175,6 +177,8 @@ extension JSON.NodeAccessor {
             self.state = .writable
         }
     }
+    /// Create or update the node at the accessed path, throwing a ``NodeAccessError`` if the
+    /// location is not writable.
     @inlinable public static func &= (
         self: inout Self,
         value: consuming JSON.Node
@@ -191,27 +195,59 @@ extension JSON.NodeAccessor {
         }
     }
 
+    /// Modify an existing node at the accessed path, returning nil if no such node exists, or
+    /// if the accessed path is invalid.
     @discardableResult
     @inlinable public static func &? <E, T>(
         self: inout Self,
         yield: (inout JSON.Node) throws(E) -> T
     ) throws(E) -> T? {
-        switch self.state {
-        case .protected:
-            return nil
-        case .reserved:
-            return nil
-        case .writable:
-            return nil
-        case .occupied(var value):
+        if case .occupied(var value) = self.state {
             self.state = .writable
             defer {
                 self.state = .occupied(value)
             }
             return try yield(&value)
+        } else {
+            return nil
         }
     }
 
+    /// Modify the node at the accessed path, creating it with a default value of ``JSON/null``,
+    /// if it does not exist.
+    ///
+    /// Use this when you are confident that the node must be written, and expect to receive
+    /// an error if incompatible data already exists in the accessed location.
+    @inlinable public static func & (
+        self: inout Self,
+        yield: (inout JSON.Node) throws -> ()
+    ) throws {
+        switch self.state {
+        case .protected:
+            throw JSON.NodeAccessError.protected(self.crumb)
+        case .reserved(let offender):
+            throw JSON.NodeAccessError.reserved(self.crumb, offender)
+        case .writable:
+            var value: JSON.Node = .null
+            try yield(&value)
+            self.state = .occupied(value)
+
+        case .occupied(let value):
+            var value: JSON.Node = consume value
+            self.state = .writable
+            defer {
+                self.state = .occupied(value)
+            }
+            try yield(&value)
+        }
+    }
+
+    /// Modify the node at the accessed path, allowing the closure to create, update, or delete
+    /// it. Assigning a value to a node that was originally nil creates it, likewise,
+    /// assigning nil to a node that was originally non-nil deletes it.
+    ///
+    /// If the accessed path is not writable, and the node is assigned a value in the
+    /// closure — including an explicit ``JSON/null`` — a ``NodeAccessError`` is thrown.
     @inlinable public static func & (
         self: inout Self,
         yield: (inout JSON.Node?) throws -> ()
